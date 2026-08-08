@@ -12,6 +12,8 @@ services:
           property: connectionString
       - key: NODE_ENV
         value: production
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
       - key: JWT_SECRET
         value: antidrug_club_secret_key_2026_secure
       - key: ADMIN_USERNAME
