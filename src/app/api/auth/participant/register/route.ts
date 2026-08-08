@@ -172,6 +172,9 @@ export async function POST(request: Request) {
     return response;
   } catch (error: any) {
     console.error('Participant Registration Error:', error);
-    return NextResponse.json({ error: 'Failed to process registration.' }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || 'Failed to process registration.' },
+      { status: 500 }
+    );
   }
 }
