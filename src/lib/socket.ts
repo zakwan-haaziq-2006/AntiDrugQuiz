@@ -12,37 +12,51 @@ export function getIO(): SocketIOServer | null {
   return null;
 }
 
-export function broadcastQuizStarted(startTime: string) {
+async function emitSocketEvent(event: string, data: any) {
   const io = getIO();
   if (io) {
-    io.emit('QUIZ_STARTED', { startTime });
+    io.emit(event, data);
+    return;
   }
+
+  // Serverless execution (e.g., Vercel API Route) - forward event to Railway WebSocket Server
+  const wsServerUrl = process.env.NEXT_PUBLIC_WS_URL || process.env.RAILWAY_WS_URL;
+  if (wsServerUrl) {
+    try {
+      const baseUrl = wsServerUrl.replace(/\/$/, '');
+      const fullUrl = baseUrl.startsWith('http') ? `${baseUrl}/api/socket-emit` : `https://${baseUrl}/api/socket-emit`;
+      const secret = process.env.JWT_SECRET || 'antidrug_club_secret_key_2026_secure';
+
+      await fetch(fullUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-socket-secret': secret,
+        },
+        body: JSON.stringify({ event, data }),
+      });
+    } catch (err) {
+      console.warn(`[Socket Broadcast Error] Failed to forward event "${event}" to remote WebSocket server:`, err);
+    }
+  }
+}
+
+export function broadcastQuizStarted(startTime: string) {
+  emitSocketEvent('QUIZ_STARTED', { startTime });
 }
 
 export function broadcastLeaderboardUpdate(leaderboard: any) {
-  const io = getIO();
-  if (io) {
-    io.emit('LEADERBOARD_UPDATED', leaderboard);
-  }
+  emitSocketEvent('LEADERBOARD_UPDATED', leaderboard);
 }
 
 export function broadcastQuizEnded() {
-  const io = getIO();
-  if (io) {
-    io.emit('QUIZ_ENDED', { timestamp: new Date().toISOString() });
-  }
+  emitSocketEvent('QUIZ_ENDED', { timestamp: new Date().toISOString() });
 }
 
 export function broadcastMalpracticeDetected(eventData: any) {
-  const io = getIO();
-  if (io) {
-    io.emit('MALPRACTICE_DETECTED', eventData);
-  }
+  emitSocketEvent('MALPRACTICE_DETECTED', eventData);
 }
 
 export function broadcastParticipantRegistered(participantData: any) {
-  const io = getIO();
-  if (io) {
-    io.emit('PARTICIPANT_REGISTERED', participantData);
-  }
+  emitSocketEvent('PARTICIPANT_REGISTERED', participantData);
 }
