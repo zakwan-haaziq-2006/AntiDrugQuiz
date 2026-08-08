@@ -54,20 +54,22 @@ export default function RegisterPage() {
     <div className="min-h-screen flex flex-col bg-neutral-50 text-neutral-900">
       <Header />
 
-      <main className="flex-1 max-w-lg mx-auto px-4 py-12 flex flex-col justify-center w-full">
-        <div className="rounded-xl border border-neutral-200 bg-white p-8 shadow-sm">
+      <main className="flex-1 max-w-lg mx-auto px-4 py-8 sm:py-12 flex flex-col justify-center w-full">
+        <div className="rounded-xl border border-neutral-200 bg-white p-5 sm:p-8 shadow-xs">
           <div className="mb-6 border-b border-neutral-100 pb-4">
-            <span className="text-xs uppercase tracking-wider font-mono font-semibold text-neutral-500">
+            <span className="text-[11px] sm:text-xs uppercase tracking-wider font-mono font-semibold text-neutral-500">
               Anti-Drug Club Quiz Competition
             </span>
-            <h1 className="text-2xl font-bold tracking-tight text-neutral-900 mt-1">Participant Registration</h1>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 mt-1">
+              Participant Registration
+            </h1>
             <p className="text-xs text-neutral-500 mt-1">
               Please enter your official academic details to enter the quiz environment.
             </p>
           </div>
 
           {error && (
-            <div className="mb-5 rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-700 font-medium">
+            <div className="mb-5 rounded-md border border-red-200 bg-red-50 p-3 text-xs text-red-700 font-medium leading-relaxed">
               {error}
             </div>
           )}
@@ -83,7 +85,7 @@ export default function RegisterPage() {
                 placeholder="Enter your full name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full rounded-md border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 focus:outline-hidden"
+                className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 focus:outline-hidden"
               />
             </div>
 
@@ -94,12 +96,11 @@ export default function RegisterPage() {
               <input
                 type="text"
                 required
-                placeholder="e.g. 21CS001"
+                placeholder="Enter your Roll No."
                 value={formData.rollNumber}
                 onChange={(e) => setFormData({ ...formData, rollNumber: e.target.value })}
-                className="w-full rounded-md border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 uppercase font-mono focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 focus:outline-hidden"
+                className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 uppercase font-mono focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 focus:outline-hidden"
               />
-              <p className="text-[11px] text-neutral-500 mt-1">Unique student Roll No. to prevent duplicate participation.</p>
             </div>
 
             <div>
@@ -109,7 +110,7 @@ export default function RegisterPage() {
               <select
                 value={formData.department}
                 onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                className="w-full rounded-md border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 font-medium focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 focus:outline-hidden"
+                className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 font-medium focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 focus:outline-hidden"
               >
                 {DEPARTMENTS.map((dept) => (
                   <option key={dept} value={dept}>
@@ -119,7 +120,7 @@ export default function RegisterPage() {
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-xs font-semibold text-neutral-700 mb-1">
                   Year <span className="text-red-500">*</span>
@@ -127,7 +128,7 @@ export default function RegisterPage() {
                 <select
                   value={formData.year}
                   onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                  className="w-full rounded-md border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 font-medium focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 focus:outline-hidden"
+                  className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 font-medium focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 focus:outline-hidden"
                 >
                   {YEARS.map((yr) => (
                     <option key={yr} value={yr}>
@@ -144,7 +145,7 @@ export default function RegisterPage() {
                 <select
                   value={formData.section}
                   onChange={(e) => setFormData({ ...formData, section: e.target.value })}
-                  className="w-full rounded-md border border-neutral-300 bg-white px-3.5 py-2.5 text-sm text-neutral-900 font-medium focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 focus:outline-hidden"
+                  className="w-full rounded-md border border-neutral-300 bg-white px-3 py-2.5 text-sm text-neutral-900 font-medium focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 focus:outline-hidden"
                 >
                   {SECTIONS.map((sec) => (
                     <option key={sec} value={sec}>
