@@ -1,0 +1,97 @@
+// Prisma Schema for Anti-Drug Club Quiz Competition Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite" // Can be changed to "postgresql" for production
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Quiz {
+  id          String     @id @default(uuid())
+  title       String     @default("Anti-Drug Club Quiz Competition")
+  status      String     @default("UPCOMING") // UPCOMING, LIVE, ENDED
+  startTime   DateTime?
+  endTime     DateTime?
+  durationSec Int        @default(1800) // 30 minutes
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  questions   Question[]
+  attempts    Attempt[]
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  quizId        String
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  questionText  String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctAnswer String   // "A", "B", "C", or "D"
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  answers       Answer[]
+}
+
+model Participant {
+  id         String    @id @default(uuid())
+  name       String
+  rollNumber String    @unique
+  department String    // CSE, IT, AIDS, AIML, ECE, EEE, MECH, CIVIL, MCA, MBA
+  year       String    // I, II, III, IV
+  section    String    // A, B
+  createdAt  DateTime  @default(now())
+  attempts   Attempt[]
+}
+
+model Attempt {
+  id                String             @id @default(uuid())
+  quizId            String
+  quiz              Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  participantId     String
+  participant       Participant        @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  startedAt         DateTime           @default(now())
+  submittedAt       DateTime?
+  score             Int?
+  completionTimeMs  Int?
+  status            String             @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, AUTO_SUBMITTED, DISQUALIFIED
+  malpractice       Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  answers           Answer[]
+  malpracticeEvents MalpracticeEvent[]
+
+  @@unique([quizId, participantId])
+}
+
+model Answer {
+  id             String   @id @default(uuid())
+  attemptId      String
+  attempt        Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId     String
+  question       Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedAnswer String   // "A", "B", "C", or "D"
+  isCorrect      Boolean?
+  answeredAt     DateTime @default(now())
+
+  @@unique([attemptId, questionId])
+}
+
+model MalpracticeEvent {
+  id        String   @id @default(uuid())
+  attemptId String
+  attempt   Attempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  eventType String   // TAB_SWITCH, WINDOW_BLUR, FULLSCREEN_EXIT
+  timestamp DateTime @default(now())
+  metadata  String?
+}
