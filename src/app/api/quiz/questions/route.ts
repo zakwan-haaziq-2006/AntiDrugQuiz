@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyJwt, formatTimeMs } from '@/lib/utils';
 import { ParticipantSession } from '@/types';
+import { getShuffledQuizForAttempt, OptionKey } from '@/lib/shuffle';
 
 export const dynamic = 'force-dynamic';
 
@@ -75,20 +76,32 @@ export async function GET() {
       },
     });
 
+    // Apply per-participant deterministic question & option shuffling
+    const shuffledQuiz = getShuffledQuizForAttempt(attempt.id, questions);
+    const clientQuestions = shuffledQuiz.map((sq) => sq.question);
+
     const answersList = await prisma.answer.findMany({
       where: { attemptId: attempt.id },
       select: { questionId: true, selectedAnswer: true },
     });
 
+    // Map saved answers (stored in DB as original option keys) to displayed option keys for this attempt
     const savedAnswers = answersList.reduce((acc, curr) => {
-      acc[curr.questionId] = curr.selectedAnswer;
+      const qMapping = shuffledQuiz.find((sq) => sq.question.id === curr.questionId);
+      if (qMapping && curr.selectedAnswer) {
+        const origKey = curr.selectedAnswer as OptionKey;
+        const dispKey = qMapping.originalToDisplayed[origKey] || origKey;
+        acc[curr.questionId] = dispKey;
+      } else {
+        acc[curr.questionId] = curr.selectedAnswer;
+      }
       return acc;
     }, {} as Record<string, string>);
 
     return NextResponse.json({
-      questions,
+      questions: clientQuestions,
       savedAnswers,
-      totalQuestions: questions.length,
+      totalQuestions: clientQuestions.length,
       quizStatus: quiz.status,
       quizStartTime: quiz.startTime ? quiz.startTime.toISOString() : null,
       durationSec: quiz.durationSec,
@@ -104,3 +117,4 @@ export async function GET() {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+

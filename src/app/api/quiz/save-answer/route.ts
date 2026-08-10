@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyJwt } from '@/lib/utils';
 import { ParticipantSession } from '@/types';
+import { getOptionMappings, OptionKey } from '@/lib/shuffle';
 
 export async function POST(request: Request) {
   try {
@@ -63,7 +64,19 @@ export async function POST(request: Request) {
       }
     }
 
-    // Upsert answer progressively
+    // Fetch original question details to translate displayed option key to original DB option key
+    const question = await prisma.question.findUnique({
+      where: { id: questionId },
+    });
+
+    if (!question) {
+      return NextResponse.json({ error: 'Question not found' }, { status: 404 });
+    }
+
+    const { displayedToOriginal } = getOptionMappings(session.attemptId, question);
+    const originalAnswerKey = displayedToOriginal[selectedAnswer as OptionKey] || selectedAnswer;
+
+    // Upsert answer progressively with original answer key
     await prisma.answer.upsert({
       where: {
         attemptId_questionId: {
@@ -72,13 +85,13 @@ export async function POST(request: Request) {
         },
       },
       update: {
-        selectedAnswer,
+        selectedAnswer: originalAnswerKey,
         answeredAt: new Date(),
       },
       create: {
         attemptId: session.attemptId,
         questionId,
-        selectedAnswer,
+        selectedAnswer: originalAnswerKey,
         answeredAt: new Date(),
       },
     });
@@ -89,3 +102,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
