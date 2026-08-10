@@ -3,7 +3,8 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-const officialQuestions = [
+// SET 1: Foundational Awareness Questions (25 Questions)
+const set1Questions = [
   {
     order: 1,
     questionText: "What is the main goal of an Anti-Drug Club?",
@@ -231,8 +232,466 @@ const officialQuestions = [
   },
 ];
 
+// SET 2: User Provided Questions (25 Questions)
+const set2Questions = [
+  {
+    order: 1,
+    questionText: "Which of these substances is illegal in most countries regardless of age?",
+    optionA: "Caffeine",
+    optionB: "Heroin",
+    optionC: "Alcohol (for adults)",
+    optionD: "Prescription antibiotics",
+    correctAnswer: "B",
+  },
+  {
+    order: 2,
+    questionText: "What is the best definition of \"wellness\"?",
+    optionA: "Avoiding all forms of medicine",
+    optionB: "A state of complete physical, mental, and social well-being",
+    optionC: "Only having a healthy diet",
+    optionD: "Never experiencing stress",
+    correctAnswer: "B",
+  },
+  {
+    order: 3,
+    questionText: "If a friend pressures you to try a drug, which response demonstrates a strong refusal skill?",
+    optionA: "\"Maybe later, ask me again tomorrow\"",
+    optionB: "\"I'll just try a tiny bit\"",
+    optionC: "\"No thanks, I'm not interested\" and changing the topic",
+    optionD: "Staying silent and walking away slowly",
+    correctAnswer: "C",
+  },
+  {
+    order: 4,
+    questionText: "Which of the following is a legal, regulated substance for adults in many countries?",
+    optionA: "Methamphetamine",
+    optionB: "Cocaine",
+    optionC: "Heroin",
+    optionD: "Tobacco",
+    correctAnswer: "D",
+  },
+  {
+    order: 5,
+    questionText: "What does \"drug abuse\" mean?",
+    optionA: "Taking medicine exactly as prescribed",
+    optionB: "Using a substance in a way that harms health or functioning",
+    optionC: "Drinking enough water daily",
+    optionD: "Exercising regularly",
+    correctAnswer: "B",
+  },
+  {
+    order: 6,
+    questionText: "Why do many teens struggle to resist peer pressure regarding substance use?",
+    optionA: "They lack access to social media",
+    optionB: "Fear of social rejection or wanting to fit in",
+    optionC: "They have too much parental supervision",
+    optionD: "They dislike their friend groups",
+    correctAnswer: "B",
+  },
+  {
+    order: 7,
+    questionText: "Which best describes \"addiction\" as a behavioral pattern?",
+    optionA: "A one-time experimental decision",
+    optionB: "A doctor-recommended treatment",
+    optionC: "A brief food craving",
+    optionD: "Compulsive substance use despite harmful consequences",
+    correctAnswer: "D",
+  },
+  {
+    order: 8,
+    questionText: "Which of these is an effective, healthy coping mechanism for stress?",
+    optionA: "Avoiding sleep for several days",
+    optionB: "Talking to a counselor or trusted adult",
+    optionC: "Isolating completely from others",
+    optionD: "Skipping meals regularly",
+    correctAnswer: "B",
+  },
+  {
+    order: 9,
+    questionText: "Which behavioral change might signal a friend is struggling with substance misuse?",
+    optionA: "Consistent academic performance",
+    optionB: "Regular attendance at extracurriculars",
+    optionC: "Sudden secrecy and withdrawal from usual activities",
+    optionD: "Stable sleeping patterns",
+    correctAnswer: "C",
+  },
+  {
+    order: 10,
+    questionText: "What is the primary purpose of a \"refusal skill\" in prevention education?",
+    optionA: "To help memorize drug names",
+    optionB: "To avoid physical activity",
+    optionC: "To ignore schoolwork",
+    optionD: "To assertively decline substance offers",
+    correctAnswer: "D",
+  },
+  {
+    order: 11,
+    questionText: "How do addictive substances primarily hijack the brain's reward system?",
+    optionA: "By eliminating all neurotransmitter activity",
+    optionB: "By causing an artificial surge of dopamine that reinforces repeated use",
+    optionC: "By permanently increasing serotonin alone",
+    optionD: "By having no measurable neurological effect",
+    correctAnswer: "B",
+  },
+  {
+    order: 12,
+    questionText: "What is \"tolerance\" in substance use?",
+    optionA: "A decline in dependency over time",
+    optionB: "Legal permission to purchase a substance",
+    optionC: "The body's complete immunity to a substance",
+    optionD: "The need for higher doses to achieve the same effect",
+    correctAnswer: "D",
+  },
+  {
+    order: 13,
+    questionText: "Which brain region, critical to addiction studies, governs decision-making and impulse control?",
+    optionA: "Occipital lobe",
+    optionB: "Cerebellum",
+    optionC: "Prefrontal cortex",
+    optionD: "Brainstem",
+    correctAnswer: "C",
+  },
+  {
+    order: 14,
+    questionText: "What is the core principle of \"harm reduction\" strategies?",
+    optionA: "Punishing all users equally regardless of circumstance",
+    optionB: "Minimizing negative health/social consequences without requiring immediate abstinence",
+    optionC: "Ignoring substance use issues entirely",
+    optionD: "Promoting unrestricted substance use",
+    correctAnswer: "B",
+  },
+  {
+    order: 15,
+    questionText: "What physiologically occurs during withdrawal from an addictive substance?",
+    optionA: "The nervous system reacts to the sudden absence of a substance it adapted to",
+    optionB: "The body returns to baseline instantly",
+    optionC: "Only appetite is affected",
+    optionD: "No measurable physical response occurs",
+    correctAnswer: "A",
+  },
+  {
+    order: 16,
+    questionText: "Why do co-occurring mental health conditions like anxiety or depression increase vulnerability to substance abuse?",
+    optionA: "Mental illness eliminates addiction risk",
+    optionB: "Substances permanently cure psychological symptoms",
+    optionC: "There is no connection between the two",
+    optionD: "Individuals may self-medicate to manage untreated symptoms",
+    correctAnswer: "D",
+  },
+  {
+    order: 17,
+    questionText: "Why might someone continue substance use even after recognizing its harm?",
+    optionA: "It is purely a matter of willpower with no biological factor",
+    optionB: "Neurological changes and psychological dependence can override rational decision-making",
+    optionC: "They are completely unaware of any consequences",
+    optionD: "Substances have no lasting behavioral effect",
+    correctAnswer: "B",
+  },
+  {
+    order: 18,
+    questionText: "Which statement best reflects an advanced understanding of relapse in recovery?",
+    optionA: "Relapse means someone can never recover",
+    optionB: "Relapse only results from personal weakness",
+    optionC: "Relapse indicates total, irreversible treatment failure",
+    optionD: "Relapse can be part of the recovery process, often triggered by stress or cravings",
+    correctAnswer: "D",
+  },
+  {
+    order: 19,
+    questionText: "How does chronic substance use typically affect the brain's natural dopamine production?",
+    optionA: "It has no impact on baseline dopamine levels",
+    optionB: "It can reduce the brain's natural ability to produce dopamine, causing dependency on the substance for normal feelings",
+    optionC: "It permanently increases natural dopamine production",
+    optionD: "It only affects dopamine in the cerebellum",
+    correctAnswer: "B",
+  },
+  {
+    order: 20,
+    questionText: "In complex social settings, what is \"enabling behavior\" among peers or family regarding substance use?",
+    optionA: "Reporting concerning behavior to a counselor",
+    optionB: "Setting firm boundaries with a struggling individual",
+    optionC: "Unintentionally supporting someone's substance use by covering up consequences",
+    optionD: "Encouraging professional treatment",
+    correctAnswer: "C",
+  },
+  {
+    order: 21,
+    questionText: "What is a key subtle psychological warning sign of substance dependency, distinct from obvious physical symptoms?",
+    optionA: "Increased participation in previously avoided hobbies",
+    optionB: "Rationalizing or minimizing the extent of one's own substance use",
+    optionC: "Consistently transparent communication with family",
+    optionD: "Stable and improving emotional regulation",
+    correctAnswer: "B",
+  },
+  {
+    order: 22,
+    questionText: "Which concept best describes \"cross-tolerance\" in pharmacology?",
+    optionA: "Tolerance to one substance that reduces sensitivity to a different, related substance",
+    optionB: "Complete immunity from all drug effects",
+    optionC: "A legal classification of controlled substances",
+    optionD: "The process of detoxification",
+    correctAnswer: "A",
+  },
+  {
+    order: 23,
+    questionText: "Why is adolescence considered a particularly vulnerable period for developing addiction, neurologically speaking?",
+    optionA: "The teenage brain is fully matured and resistant to change",
+    optionB: "The prefrontal cortex is still developing, affecting judgment and impulse control",
+    optionC: "Teenagers have naturally lower dopamine sensitivity",
+    optionD: "Adolescent brains cannot form habits",
+    correctAnswer: "B",
+  },
+  {
+    order: 24,
+    questionText: "What is the significance of \"triggers\" in relapse prevention planning?",
+    optionA: "They are irrelevant to long-term recovery",
+    optionB: "They only apply to first-time substance users",
+    optionC: "Identifying environmental or emotional triggers helps individuals develop proactive coping strategies",
+    optionD: "Triggers guarantee relapse will occur",
+    correctAnswer: "C",
+  },
+  {
+    order: 25,
+    questionText: "How might social stigma around addiction negatively impact recovery outcomes?",
+    optionA: "Stigma has no measurable effect on recovery",
+    optionB: "Stigma always motivates faster recovery",
+    optionC: "Stigma only affects legal outcomes, not health",
+    optionD: "Stigma can discourage individuals from seeking help due to fear of judgment",
+    correctAnswer: "D",
+  },
+];
+
+// SET 3: Advanced Anti-Drug & Neuroscience Awareness (25 Questions)
+const set3Questions = [
+  {
+    order: 1,
+    questionText: "What is the primary role of neuroplasticity in substance addiction recovery?",
+    optionA: "The brain's ability to rewire and form new neural pathways without substances",
+    optionB: "Permanent destruction of brain tissue that cannot heal",
+    optionC: "The immediate return of normal dopamine levels within one hour",
+    optionD: "The brain's refusal to adapt to behavioral changes",
+    correctAnswer: "A",
+  },
+  {
+    order: 2,
+    questionText: "Which classification of drugs slows down central nervous system activity, lowering heart rate and respiration?",
+    optionA: "Stimulants",
+    optionB: "Depressants",
+    optionC: "Hallucinogens",
+    optionD: "Anabolic Steroids",
+    correctAnswer: "B",
+  },
+  {
+    order: 3,
+    questionText: "What distinguishes physical dependence from psychological dependence?",
+    optionA: "Physical dependence involves bodily withdrawal symptoms; psychological dependence involves emotional cravings",
+    optionB: "Physical dependence only occurs with caffeine",
+    optionC: "Psychological dependence never results in long-term habit formation",
+    optionD: "There is no difference between the two concepts",
+    correctAnswer: "A",
+  },
+  {
+    order: 4,
+    questionText: "What is the main danger of prescription drug misuse (e.g., taking someone else's prescription)?",
+    optionA: "Prescriptions are always safe regardless of who takes them",
+    optionB: "Dosages are tailored to individual medical profiles and can cause severe toxicity or overdose in others",
+    optionC: "Prescriptions have no active pharmacological ingredients",
+    optionD: "It is only illegal if taken in public",
+    correctAnswer: "B",
+  },
+  {
+    order: 5,
+    questionText: "Which neurotransmitter is primarily targeted by opioid medications to relieve pain and induce euphoria?",
+    optionA: "Endorphins / Opioid receptors",
+    optionB: "Acetylcholine",
+    optionC: "Histamine",
+    optionD: "Thyroid hormone",
+    correctAnswer: "A",
+  },
+  {
+    order: 6,
+    questionText: "What is a \"synergistic effect\" when multiple substances are used simultaneously?",
+    optionA: "The combined interaction multiplies the total dangerous effect far beyond individual dosages",
+    optionB: "The drugs cancel each other out completely",
+    optionC: "The body becomes immune to all drug toxicity",
+    optionD: "The substances reduce heart rate to zero safely",
+    correctAnswer: "A",
+  },
+  {
+    order: 7,
+    questionText: "Which community resource provides free, confidential 24/7 support for individuals facing substance use disorders?",
+    optionA: "National or local substance abuse helplines and support groups",
+    optionB: "Social media comment sections",
+    optionC: "Commercial pharmaceutical advertisements",
+    optionD: "Unlicensed online forums",
+    correctAnswer: "A",
+  },
+  {
+    order: 8,
+    questionText: "Why is vaping e-cigarettes harmful to adolescent lung health?",
+    optionA: "E-cigarette vapor contains heavy metals, ultra-fine particles, and toxic chemical flavorings",
+    optionB: "E-cigarettes contain only harmless pure water vapor",
+    optionC: "Vaping improves oxygen intake during athletics",
+    optionD: "E-cigarettes contain no addictive chemical compounds",
+    correctAnswer: "A",
+  },
+  {
+    order: 9,
+    questionText: "What is \"anhedonia\", a common symptom experienced during early recovery from chronic drug use?",
+    optionA: "An inability to experience pleasure from naturally rewarding activities",
+    optionB: "Extreme hyper-energy and excessive happiness",
+    optionC: "Loss of physical hearing capability",
+    optionD: "A sudden surge in physical strength",
+    correctAnswer: "A",
+  },
+  {
+    order: 10,
+    questionText: "What is the primary objective of primary prevention programs in schools?",
+    optionA: "To educate and prevent substance experimentation before it begins",
+    optionB: "To arrest students after drug detection",
+    optionC: "To provide clinical rehabilitation inside classrooms",
+    optionD: "To grade students on physical fitness",
+    correctAnswer: "A",
+  },
+  {
+    order: 11,
+    questionText: "Which organ is primarily responsible for metabolizing and breaking down alcohol and toxic chemical byproducts?",
+    optionA: "Lungs",
+    optionB: "Liver",
+    optionC: "Kidneys",
+    optionD: "Pancreas",
+    correctAnswer: "B",
+  },
+  {
+    order: 12,
+    questionText: "What does the term \"polysubstance use\" refer to?",
+    optionA: "Using only one legal drug once a year",
+    optionB: "Consuming two or more different substances within a short timeframe",
+    optionC: "Eating a diet high in proteins and carbohydrates",
+    optionD: "Taking vitamins alongside prescribed antibiotics",
+    correctAnswer: "B",
+  },
+  {
+    order: 13,
+    questionText: "How does chronic cannabis use affect memory consolidation in developing brains?",
+    optionA: "It can impair short-term memory formation and spatial processing in the hippocampus",
+    optionB: "It permanently increases memory recall speed by 50%",
+    optionC: "It has zero impact on brain structure or function",
+    optionD: "It eliminates the need for sleep",
+    correctAnswer: "A",
+  },
+  {
+    order: 14,
+    questionText: "What is the main risk associated with synthetic cannabinoids (e.g., \"Spice\" or \"K2\") compared to natural cannabis?",
+    optionA: "Synthetic variants can be unpredictable, highly potent full agonists causing severe toxic reactions or seizures",
+    optionB: "Synthetic variants are certified organic and milder",
+    optionC: "They contain no active chemicals",
+    optionD: "They are manufactured in medical operating rooms",
+    correctAnswer: "A",
+  },
+  {
+    order: 15,
+    questionText: "What is the standard emergency medical treatment used to reverse an opioid overdose?",
+    optionA: "Epinephrine",
+    optionB: "Naloxone (Narcan)",
+    optionC: "Insulin",
+    optionD: "Antihistamines",
+    correctAnswer: "B",
+  },
+  {
+    order: 16,
+    questionText: "What is meant by \"protective factors\" in substance abuse epidemiology?",
+    optionA: "Conditions or attributes (like strong family support and school connection) that reduce addiction risk",
+    optionB: "Physical helmets worn during contact sports",
+    optionC: "Legal laws that prohibit all medicine sales",
+    optionD: "Genetic mutations that make a person invincible to drugs",
+    correctAnswer: "A",
+  },
+  {
+    order: 17,
+    questionText: "Which class of drugs includes substances like methamphetamine, cocaine, and MDMA, which increase alertness and heart rate?",
+    optionA: "Sedatives",
+    optionB: "Stimulants",
+    optionC: "Inhalants",
+    optionD: "Narcotics",
+    correctAnswer: "B",
+  },
+  {
+    order: 18,
+    questionText: "What is the phenomenon where a person requires a substance just to feel \"normal\" and avoid withdrawal?",
+    optionA: "Chemical dependency",
+    optionB: "Voluntary recreation",
+    optionC: "High metabolic efficiency",
+    optionD: "Placebo response",
+    correctAnswer: "A",
+  },
+  {
+    order: 19,
+    questionText: "Why are inhalants (e.g., household solvents, spray paints) exceptionally dangerous even on first use?",
+    optionA: "They can cause \"Sudden Sniffing Death Syndrome\" by inducing fatal cardiac arrhythmias",
+    optionB: "They are completely non-toxic liquids",
+    optionC: "They only affect digestion",
+    optionD: "They cannot pass into the bloodstream",
+    correctAnswer: "A",
+  },
+  {
+    order: 20,
+    questionText: "What role does peer education play in anti-drug campus initiatives?",
+    optionA: "Peers can relate closely and deliver relatable, persuasive prevention messages",
+    optionB: "Peers can write official medical prescriptions",
+    optionC: "Peer education replaces professional medical care",
+    optionD: "It is only used to organize sports events",
+    correctAnswer: "A",
+  },
+  {
+    order: 21,
+    questionText: "What is the psychological concept of \"self-efficacy\" in refusal training?",
+    optionA: "An individual's belief in their own capability to resist pressure and stick to healthy decisions",
+    optionB: "Reliance on others to make personal choices",
+    optionC: "A measure of physical muscle strength",
+    optionD: "The speed at which someone runs away",
+    correctAnswer: "A",
+  },
+  {
+    order: 22,
+    questionText: "Which long-term health condition is directly linked to chronic tobacco smoking and secondhand smoke exposure?",
+    optionA: "Chronic Obstructive Pulmonary Disease (COPD) and lung carcinoma",
+    optionB: "Improved cardiovascular endurance",
+    optionC: "Enhanced bone density",
+    optionD: "Type 1 Diabetes",
+    correctAnswer: "A",
+  },
+  {
+    order: 23,
+    questionText: "What is \"detoxification\" in the continuum of addiction treatment?",
+    optionA: "The initial medical process of allowing the body to clear itself of drugs while managing withdrawal safely",
+    optionB: "A long-term job training program",
+    optionC: "The immediate cure of all psychological cravings",
+    optionD: "A mandatory prison sentence",
+    correctAnswer: "A",
+  },
+  {
+    order: 24,
+    questionText: "How do motivational interviewing techniques help individuals struggling with substance use?",
+    optionA: "By exploring and resolving ambivalence to empower self-directed motivation for change",
+    optionB: "By lecturing and shaming the person",
+    optionC: "By prescribing mandatory physical isolation",
+    optionD: "By ignoring their personal feelings entirely",
+    correctAnswer: "A",
+  },
+  {
+    order: 25,
+    questionText: "What is the ultimate goal of establishing a drug-free campus environment?",
+    optionA: "Fostering a safe, healthy, and supportive community conducive to learning and personal growth",
+    optionB: "Restricting all social activities on campus",
+    optionC: "Eliminating academic examinations",
+    optionD: "Preventing students from interacting with each other",
+    correctAnswer: "A",
+  },
+];
+
 async function main() {
-  console.log('Seeding Anti-Drug Club Official Quiz Database...');
+  console.log('Seeding Anti-Drug Club Official Multi-Set Quiz Database...');
 
   // Create Admin
   const adminPassword = await bcrypt.hash('admin@login.123', 10);
@@ -253,19 +712,27 @@ async function main() {
       data: {
         title: 'Anti-Drug Club Quiz Competition',
         status: 'UPCOMING',
+        activeSet: 1,
         durationSec: 1800, // 30 minutes
       },
     });
+  } else {
+    // Ensure activeSet is defined
+    await prisma.quiz.update({
+      where: { id: quiz.id },
+      data: { activeSet: quiz.activeSet || 1 },
+    });
   }
 
-  // Clear existing questions for fresh seed
+  // Clear existing questions for fresh multi-set seed
   await prisma.question.deleteMany({ where: { quizId: quiz.id } });
 
-  // Create 25 official questions
-  for (const q of officialQuestions) {
+  // Seed Set 1
+  for (const q of set1Questions) {
     await prisma.question.create({
       data: {
         quizId: quiz.id,
+        setId: 1,
         order: q.order,
         questionText: q.questionText,
         optionA: q.optionA,
@@ -276,8 +743,45 @@ async function main() {
       },
     });
   }
+  console.log(`Successfully seeded Set 1 (${set1Questions.length} questions).`);
 
-  console.log(`Successfully seeded ${officialQuestions.length} official questions into the database.`);
+  // Seed Set 2
+  for (const q of set2Questions) {
+    await prisma.question.create({
+      data: {
+        quizId: quiz.id,
+        setId: 2,
+        order: q.order,
+        questionText: q.questionText,
+        optionA: q.optionA,
+        optionB: q.optionB,
+        optionC: q.optionC,
+        optionD: q.optionD,
+        correctAnswer: q.correctAnswer,
+      },
+    });
+  }
+  console.log(`Successfully seeded Set 2 (${set2Questions.length} questions).`);
+
+  // Seed Set 3
+  for (const q of set3Questions) {
+    await prisma.question.create({
+      data: {
+        quizId: quiz.id,
+        setId: 3,
+        order: q.order,
+        questionText: q.questionText,
+        optionA: q.optionA,
+        optionB: q.optionB,
+        optionC: q.optionC,
+        optionD: q.optionD,
+        correctAnswer: q.correctAnswer,
+      },
+    });
+  }
+  console.log(`Successfully seeded Set 3 (${set3Questions.length} questions).`);
+
+  console.log('Multi-set seeding complete: 75 total questions across Sets 1, 2, and 3.');
 }
 
 main()

@@ -125,6 +125,7 @@ export async function POST(request: Request) {
         data: {
           quizId: quiz.id,
           participantId: participant.id,
+          setId: quiz.activeSet || 1,
           status: 'IN_PROGRESS',
         },
       });

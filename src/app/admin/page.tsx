@@ -23,6 +23,8 @@ export default function AdminDashboard() {
   const [actionLoading, setActionLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [activeSet, setActiveSet] = useState<number>(1);
+
   const fetchDashboardData = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/results');
@@ -37,6 +39,9 @@ export default function AdminDashboard() {
       }
 
       setError(null);
+      if (data.activeSet) {
+        setActiveSet(data.activeSet);
+      }
       setStats({
         quizStatus: data.quizStatus || 'UPCOMING',
         totalRegistered: data.totalRegistered || 0,
@@ -87,6 +92,26 @@ export default function AdminDashboard() {
       clearInterval(interval);
     };
   }, [fetchDashboardData]);
+
+  const handleSetChange = async (setId: number) => {
+    setActionLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/admin/quiz/control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'SET_ACTIVE_SET', setId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to change active question set.');
+      setActiveSet(setId);
+      await fetchDashboardData();
+    } catch (err: any) {
+      setError(err.message || 'Failed to change question set.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const handleQuizControl = async (action: 'START' | 'END' | 'RESET') => {
     if (action === 'RESET') {
@@ -155,7 +180,7 @@ export default function AdminDashboard() {
               href="/admin/questions"
               className="rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-xs font-semibold text-neutral-800 hover:bg-neutral-50 transition-colors shadow-2xs"
             >
-              Question Management (25)
+              Question Sets Management (75 Qs)
             </Link>
             <Link
               href="/admin/results"
@@ -187,10 +212,67 @@ export default function AdminDashboard() {
           totalMalpractice={stats.totalMalpractice}
         />
 
+        {/* Question Set Selection Control Station */}
+        <div className="mb-8 rounded-xl border border-blue-200 bg-blue-50/50 p-6 shadow-xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-blue-200 pb-4 mb-4">
+            <div>
+              <h2 className="text-sm font-bold text-blue-950 uppercase tracking-wider flex items-center gap-2">
+                🎯 Select Active Question Set (For Upcoming / Current Batches)
+              </h2>
+              <p className="text-xs text-blue-700 mt-1">
+                Choose which 25-question batch set new participants will answer during their quiz competition attempt.
+              </p>
+            </div>
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white shadow-xs">
+              Active Set: Set {activeSet}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[1, 2, 3].map((num) => {
+              const isActive = activeSet === num;
+              const titleMap: Record<number, string> = {
+                1: 'Set 1: Foundational Awareness (25 Qs)',
+                2: 'Set 2: Peer Pressure & Harm Reduction (25 Qs)',
+                3: 'Set 3: Advanced Prevention & Neuroscience (25 Qs)',
+              };
+              return (
+                <button
+                  key={num}
+                  onClick={() => handleSetChange(num)}
+                  disabled={actionLoading}
+                  className={`p-4 rounded-lg border text-left transition-all relative ${
+                    isActive
+                      ? 'border-blue-600 bg-white ring-2 ring-blue-500 shadow-sm'
+                      : 'border-neutral-200 bg-white hover:border-blue-300 hover:bg-blue-50/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded ${isActive ? 'bg-blue-600 text-white' : 'bg-neutral-100 text-neutral-700'}`}>
+                      SET {num}
+                    </span>
+                    {isActive && (
+                      <span className="text-[11px] font-bold text-blue-600 flex items-center gap-1">
+                        ✓ ACTIVE
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs font-semibold text-neutral-900 mt-2">{titleMap[num]}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="mb-10 rounded-xl border border-neutral-200 bg-white p-6 shadow-xs">
-          <h2 className="text-xs uppercase font-mono tracking-wider font-semibold text-neutral-500 mb-4">
-            Event Control Station
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xs uppercase font-mono tracking-wider font-semibold text-neutral-500">
+              Event Control Station
+            </h2>
+            <span className="text-xs font-semibold text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-md">
+              Current Quiz Set: <strong className="text-neutral-900">Set {activeSet}</strong>
+            </span>
+          </div>
 
           <div className="flex flex-wrap items-center gap-4">
             {stats.quizStatus === 'UPCOMING' && (
@@ -199,7 +281,7 @@ export default function AdminDashboard() {
                 disabled={actionLoading}
                 className="px-8 py-3 rounded-md bg-emerald-600 font-bold text-sm text-white hover:bg-emerald-500 shadow-md transition-all disabled:opacity-50 flex items-center gap-2"
               >
-                ▶ START QUIZ NOW
+                ▶ START QUIZ NOW (SET {activeSet})
               </button>
             )}
 
@@ -223,7 +305,7 @@ export default function AdminDashboard() {
           </div>
 
           <p className="text-xs text-neutral-600 mt-4 leading-relaxed">
-            Clicking <strong className="text-neutral-900">START QUIZ</strong> immediately records the exact server start timestamp, updates status to LIVE, and signals all waiting participants to enter the 25-question quiz interface.
+            Clicking <strong className="text-neutral-900">START QUIZ</strong> immediately records the exact server start timestamp, updates status to LIVE, and signals all waiting participants to enter the Set {activeSet} (25-question) interface.
           </p>
         </div>
 

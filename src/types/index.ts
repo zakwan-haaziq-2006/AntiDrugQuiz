@@ -2,6 +2,7 @@ export type QuizStatus = 'UPCOMING' | 'LIVE' | 'ENDED';
 
 export interface QuestionClient {
   id: string;
+  setId?: number;
   order: number;
   questionText: string;
   optionA: string;

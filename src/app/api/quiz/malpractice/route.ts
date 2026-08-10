@@ -59,8 +59,11 @@ export async function POST(request: Request) {
           return acc;
         }, {} as Record<string, string>);
 
+        const activeSet = attempt.setId || attempt.quiz.activeSet || 1;
+        const setQuestions = attempt.quiz.questions.filter((q) => q.setId === activeSet);
+
         let score = 0;
-        for (const q of attempt.quiz.questions) {
+        for (const q of setQuestions) {
           if (userAnswersMap[q.id] === q.correctAnswer) {
             score++;
           }

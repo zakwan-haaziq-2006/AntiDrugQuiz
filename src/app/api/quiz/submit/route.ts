@@ -95,7 +95,8 @@ export async function POST(request: Request) {
     }, {} as Record<string, string>);
 
     let score = 0;
-    const questions = attempt.quiz.questions;
+    const activeSet = attempt.setId || attempt.quiz.activeSet || 1;
+    const questions = attempt.quiz.questions.filter((q) => q.setId === activeSet);
 
     // Score answers server-side
     for (const q of questions) {

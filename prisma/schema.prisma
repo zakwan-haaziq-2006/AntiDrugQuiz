@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -20,6 +20,7 @@ model Quiz {
   id          String     @id @default(uuid())
   title       String     @default("Anti-Drug Club Quiz Competition")
   status      String     @default("UPCOMING") // UPCOMING, LIVE, ENDED
+  activeSet   Int        @default(1) // 1, 2, or 3
   startTime   DateTime?
   endTime     DateTime?
   durationSec Int        @default(1800) // 30 minutes
@@ -33,6 +34,7 @@ model Question {
   id            String   @id @default(uuid())
   quizId        String
   quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  setId         Int      @default(1) // 1, 2, or 3
   questionText  String
   optionA       String
   optionB       String
@@ -61,6 +63,7 @@ model Attempt {
   quiz              Quiz               @relation(fields: [quizId], references: [id], onDelete: Cascade)
   participantId     String
   participant       Participant        @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  setId             Int                @default(1)
   startedAt         DateTime           @default(now())
   submittedAt       DateTime?
   score             Int?

@@ -127,6 +127,7 @@ export default function AdminResultsPage() {
                   <th className="py-3 px-4">Participant Name</th>
                   <th className="py-3 px-4">Roll No.</th>
                   <th className="py-3 px-4">Dept / Year / Sec</th>
+                  <th className="py-3 px-4 text-center">Set</th>
                   <th className="py-3 px-4 text-center">Score</th>
                   <th className="py-3 px-4 text-right">Duration</th>
                   <th className="py-3 px-4 text-center">Status</th>
@@ -136,7 +137,7 @@ export default function AdminResultsPage() {
               <tbody className="divide-y divide-neutral-100">
                 {filteredResults.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-neutral-500 font-sans">
+                    <td colSpan={9} className="py-8 text-center text-neutral-500 font-sans">
                       No matching participants found.
                     </td>
                   </tr>
@@ -178,6 +179,11 @@ export default function AdminResultsPage() {
                       </td>
                       <td className="py-3.5 px-4 font-sans text-neutral-600">
                         {r.department} • Year {r.year} ({r.section})
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <span className="inline-block rounded bg-blue-50 px-2 py-0.5 text-[11px] font-bold text-blue-700 border border-blue-200">
+                          Set {r.setId || 1}
+                        </span>
                       </td>
                       <td className="py-3.5 px-4 text-center font-bold text-neutral-900 text-sm">
                         {r.score} <span className="text-xs font-normal text-neutral-400">/ 25</span>

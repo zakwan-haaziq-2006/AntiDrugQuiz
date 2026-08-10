@@ -11,24 +11,32 @@ async function checkAdminAuth() {
   return decoded?.role === 'admin';
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const isAdmin = await checkAdminAuth();
     if (!isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const setIdParam = searchParams.get('setId');
+
     const quiz = await prisma.quiz.findFirst();
     if (!quiz) {
-      return NextResponse.json({ questions: [] });
+      return NextResponse.json({ questions: [], activeSet: 1 });
+    }
+
+    const whereCondition: any = { quizId: quiz.id };
+    if (setIdParam) {
+      whereCondition.setId = parseInt(setIdParam, 10);
     }
 
     const questions = await prisma.question.findMany({
-      where: { quizId: quiz.id },
+      where: whereCondition,
       orderBy: { order: 'asc' },
     });
 
-    return NextResponse.json({ questions });
+    return NextResponse.json({ questions, activeSet: quiz.activeSet || 1 });
   } catch (error: any) {
     console.error('Admin Questions GET Error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
@@ -47,14 +55,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
     }
 
-    const { questionText, optionA, optionB, optionC, optionD, correctAnswer, order } = await request.json();
+    const { questionText, optionA, optionB, optionC, optionD, correctAnswer, order, setId } = await request.json();
 
     if (!questionText || !optionA || !optionB || !optionC || !optionD || !['A', 'B', 'C', 'D'].includes(correctAnswer)) {
       return NextResponse.json({ error: 'Invalid question fields or correct answer' }, { status: 400 });
     }
 
+    const targetSet = setId ? parseInt(setId, 10) : (quiz.activeSet || 1);
+
     const maxOrder = await prisma.question.aggregate({
-      where: { quizId: quiz.id },
+      where: { quizId: quiz.id, setId: targetSet },
       _max: { order: true },
     });
 
@@ -63,6 +73,7 @@ export async function POST(request: Request) {
     const question = await prisma.question.create({
       data: {
         quizId: quiz.id,
+        setId: targetSet,
         questionText,
         optionA,
         optionB,
@@ -87,7 +98,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id, questionText, optionA, optionB, optionC, optionD, correctAnswer, order } = await request.json();
+    const { id, questionText, optionA, optionB, optionC, optionD, correctAnswer, order, setId } = await request.json();
 
     if (!id || !questionText || !optionA || !optionB || !optionC || !optionD || !['A', 'B', 'C', 'D'].includes(correctAnswer)) {
       return NextResponse.json({ error: 'Invalid request parameters' }, { status: 400 });
@@ -103,6 +114,7 @@ export async function PUT(request: Request) {
         optionD,
         correctAnswer,
         order: order !== undefined ? order : undefined,
+        setId: setId !== undefined ? parseInt(setId, 10) : undefined,
       },
     });
 

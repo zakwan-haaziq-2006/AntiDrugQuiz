@@ -9,20 +9,25 @@ import { QuestionAdmin } from '@/types';
 export default function AdminQuestionsPage() {
   const router = useRouter();
   const [questions, setQuestions] = useState<QuestionAdmin[]>([]);
+  const [selectedSet, setSelectedSet] = useState<number>(1);
+  const [activeQuizSet, setActiveQuizSet] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [editingQuestion, setEditingQuestion] = useState<QuestionAdmin | null>(null);
   const [isNew, setIsNew] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchQuestions = useCallback(async () => {
+  const fetchQuestions = useCallback(async (setId: number) => {
     try {
-      const res = await fetch('/api/admin/questions');
+      const res = await fetch(`/api/admin/questions?setId=${setId}`);
       if (res.status === 401) {
         router.push('/admin/login');
         return;
       }
       const data = await res.json();
       setQuestions(data.questions || []);
+      if (data.activeSet) {
+        setActiveQuizSet(data.activeSet);
+      }
     } catch (err: any) {
       console.error('Failed to fetch questions:', err);
     } finally {
@@ -31,8 +36,8 @@ export default function AdminQuestionsPage() {
   }, [router]);
 
   useEffect(() => {
-    fetchQuestions();
-  }, [fetchQuestions]);
+    fetchQuestions(selectedSet);
+  }, [fetchQuestions, selectedSet]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,12 +45,16 @@ export default function AdminQuestionsPage() {
 
     setError(null);
     const method = isNew ? 'POST' : 'PUT';
+    const payload = {
+      ...editingQuestion,
+      setId: editingQuestion.setId || selectedSet,
+    };
 
     try {
       const res = await fetch('/api/admin/questions', {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editingQuestion),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -54,7 +63,7 @@ export default function AdminQuestionsPage() {
       }
 
       setEditingQuestion(null);
-      await fetchQuestions();
+      await fetchQuestions(selectedSet);
     } catch (err: any) {
       setError(err.message || 'Error saving question.');
     }
@@ -65,7 +74,7 @@ export default function AdminQuestionsPage() {
     try {
       const res = await fetch(`/api/admin/questions?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
-        await fetchQuestions();
+        await fetchQuestions(selectedSet);
       }
     } catch (e) {
       console.error('Delete question error:', e);
@@ -76,6 +85,7 @@ export default function AdminQuestionsPage() {
     setIsNew(true);
     setEditingQuestion({
       id: '',
+      setId: selectedSet,
       order: questions.length + 1,
       questionText: '',
       optionA: '',
@@ -102,21 +112,50 @@ export default function AdminQuestionsPage() {
       <Header />
 
       <main className="flex-1 max-w-5xl mx-auto px-4 py-10 w-full">
-        <div className="mb-6 flex items-center justify-between border-b border-neutral-200 pb-4">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 pb-4">
           <div>
             <Link href="/admin" className="text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition-colors mb-1 inline-block">
               ← Back to Admin Dashboard
             </Link>
-            <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Question Management</h1>
-            <p className="text-xs text-neutral-500 mt-0.5">Total Official Questions: {questions.length} / 25</p>
+            <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Question Sets Management</h1>
+            <p className="text-xs text-neutral-500 mt-0.5">
+              Viewing Set {selectedSet} ({questions.length} / 25 Questions) — Live Quiz Active Set: <strong className="text-blue-600">Set {activeQuizSet}</strong>
+            </p>
           </div>
 
           <button
             onClick={openNewForm}
             className="rounded-md bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800 transition-colors shadow-xs"
           >
-            + Add New Question
+            + Add Question to Set {selectedSet}
           </button>
+        </div>
+
+        {/* Set Selection Tabs */}
+        <div className="mb-6 flex items-center gap-2 border-b border-neutral-200 pb-3">
+          <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider mr-2 font-mono">Select Set:</span>
+          {[1, 2, 3].map((setNum) => {
+            const isCurrent = selectedSet === setNum;
+            const isLive = activeQuizSet === setNum;
+            return (
+              <button
+                key={setNum}
+                onClick={() => setSelectedSet(setNum)}
+                className={`px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 ${
+                  isCurrent
+                    ? 'bg-neutral-900 text-white shadow-xs'
+                    : 'bg-white text-neutral-700 border border-neutral-300 hover:bg-neutral-100'
+                }`}
+              >
+                Set {setNum}
+                {isLive && (
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono ${isCurrent ? 'bg-blue-500 text-white' : 'bg-blue-100 text-blue-800'}`}>
+                    LIVE ACTIVE
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {editingQuestion && (

@@ -15,8 +15,16 @@ export const MalpracticeAlert: React.FC<MalpracticeAlertProps> = ({
   const [incidentCount, setIncidentCount] = useState<number>(0);
   const [isDisqualified, setIsDisqualified] = useState<boolean>(false);
   const [lastReason, setLastReason] = useState<string>('TAB_SWITCH');
+  const lastTriggeredRef = React.useRef<number>(0);
 
   const triggerMalpractice = async (eventType: string) => {
+    const now = Date.now();
+    // Debounce triggers within 1500ms to prevent tab_switch + blur double triggering
+    if (now - lastTriggeredRef.current < 1500) {
+      return;
+    }
+    lastTriggeredRef.current = now;
+
     try {
       setLastReason(eventType);
       const res = await fetch('/api/quiz/malpractice', {

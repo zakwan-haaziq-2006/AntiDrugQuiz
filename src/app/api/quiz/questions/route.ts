@@ -58,8 +58,10 @@ export async function GET() {
       );
     }
 
+    const activeSet = attempt.setId || quiz.activeSet || 1;
+
     const questions = await prisma.question.findMany({
-      where: { quizId: quiz.id },
+      where: { quizId: quiz.id, setId: activeSet },
       orderBy: { order: 'asc' },
       select: {
         id: true,

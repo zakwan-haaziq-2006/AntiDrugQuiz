@@ -20,7 +20,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Admin privileges required' }, { status: 403 });
     }
 
-    const { action } = await request.json();
+    const body = await request.json();
+    const { action, setId } = body;
 
     const quiz = await prisma.quiz.findFirst({
       include: { questions: true },
@@ -82,8 +83,11 @@ export async function POST(request: Request) {
           return acc;
         }, {} as Record<string, string>);
 
+        const attemptSet = attempt.setId || quiz.activeSet || 1;
+        const setQuestions = quiz.questions.filter((q) => q.setId === attemptSet);
+
         let score = 0;
-        for (const q of quiz.questions) {
+        for (const q of setQuestions) {
           if (userAnswersMap[q.id] === q.correctAnswer) {
             score++;
           }
@@ -110,6 +114,25 @@ export async function POST(request: Request) {
         success: true,
         message: 'Quiz ended successfully. All in-progress attempts finalized.',
         status: updatedQuiz.status,
+      });
+    }
+
+    if (action === 'SET_ACTIVE_SET') {
+      const { setId } = body;
+      const parsedSetId = parseInt(setId, 10);
+      if (![1, 2, 3].includes(parsedSetId)) {
+        return NextResponse.json({ error: 'Invalid setId. Must be 1, 2, or 3.' }, { status: 400 });
+      }
+
+      const updatedQuiz = await prisma.quiz.update({
+        where: { id: quiz.id },
+        data: { activeSet: parsedSetId },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Active Question Set changed to Set ${parsedSetId}`,
+        activeSet: updatedQuiz.activeSet,
       });
     }
 
