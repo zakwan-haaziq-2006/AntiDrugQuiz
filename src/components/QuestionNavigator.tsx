@@ -35,19 +35,23 @@ export const QuestionNavigator: React.FC<QuestionNavigatorProps> = ({
           const qId = questions[idx]?.id;
           const isAnswered = Boolean(qId && answers[qId]);
           const isCurrent = idx === currentIndex;
+          const isPrevious = idx < currentIndex;
 
           return (
             <button
               key={idx}
               onClick={() => onSelectQuestion(idx)}
+              disabled={isPrevious}
               className={`flex h-9 items-center justify-center rounded-md text-xs font-mono font-semibold transition-all ${
                 isCurrent
                   ? 'ring-2 ring-neutral-900 bg-neutral-900 text-white font-bold'
+                  : isPrevious
+                  ? 'bg-neutral-100 text-neutral-400 border border-neutral-200 cursor-not-allowed opacity-50'
                   : isAnswered
                   ? 'bg-neutral-100 text-neutral-900 border border-neutral-300 font-bold'
                   : 'border border-neutral-200 bg-white text-neutral-600 hover:border-neutral-400'
               }`}
-              title={`Question ${idx + 1} - ${isAnswered ? 'Answered' : 'Unanswered'}`}
+              title={`Question ${idx + 1} - ${isPrevious ? 'Completed (cannot re-visit)' : isAnswered ? 'Answered' : 'Unanswered'}`}
             >
               {idx + 1}
             </button>

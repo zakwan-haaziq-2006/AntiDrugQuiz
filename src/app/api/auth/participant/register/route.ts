@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const cleanRoll = rollNumber.trim().toUpperCase();
+    const cleanRoll = rollNumber.replace(/\s+/g, '').toUpperCase();
     const cleanName = name.trim();
     const cleanDept = (department || 'CSE').trim().toUpperCase();
     const cleanYear = (year || 'I').trim().toUpperCase();
@@ -80,17 +80,21 @@ export async function POST(request: Request) {
 
       if (existingAttempt) {
         if (existingAttempt.status === 'DISQUALIFIED') {
-          return NextResponse.json(
+          const res = NextResponse.json(
             { error: 'Registration Denied: You have been disqualified from this quiz competition due to malpractice violations. Multiple registrations are strictly prohibited.' },
             { status: 403 }
           );
+          res.cookies.set('participant_token', '', { path: '/', maxAge: 0 });
+          return res;
         }
 
         if (existingAttempt.status === 'COMPLETED' || existingAttempt.status === 'AUTO_SUBMITTED') {
-          return NextResponse.json(
+          const res = NextResponse.json(
             { error: 'Registration Denied: You have already completed and submitted your quiz attempt. Multiple entries are not permitted.' },
             { status: 403 }
           );
+          res.cookies.set('participant_token', '', { path: '/', maxAge: 0 });
+          return res;
         }
       }
     } else {

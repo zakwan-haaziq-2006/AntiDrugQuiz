@@ -99,7 +99,7 @@ export default function QuizPage() {
           router.push('/register');
           return;
         }
-        if (res.status === 403 && data.status === 'DISQUALIFIED') {
+        if ((res.status === 403 || res.status === 400) && (data.status === 'DISQUALIFIED' || data.attemptStatus === 'DISQUALIFIED' || data.isDisqualified)) {
           setIsDisqualified(true);
           return;
         }
@@ -197,10 +197,17 @@ export default function QuizPage() {
       });
 
       const data = await res.json();
-      if (!res.ok && data.timeExpired) {
-        setQuizStatus('ENDED');
-        handleSubmitQuiz(true);
-        return;
+
+      if (!res.ok) {
+        if (res.status === 403 && (data.status === 'DISQUALIFIED' || data.isDisqualified)) {
+          setIsDisqualified(true);
+          return;
+        }
+        if (data.timeExpired) {
+          setQuizStatus('ENDED');
+          handleSubmitQuiz(true);
+          return;
+        }
       }
 
       setSaveStatus('saved');
@@ -211,7 +218,7 @@ export default function QuizPage() {
     }
   };
 
-  // Keyboard Navigation & Option Shortcuts
+  // Keyboard Navigation & Option Shortcuts (Forward only)
   useEffect(() => {
     if (loading || submittedResult || isDisqualified || showConfirmModal || showGuidelinesModal) return;
 
@@ -229,8 +236,6 @@ export default function QuizPage() {
         handleSelectOption('D');
       } else if (e.key === 'ArrowRight') {
         setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1));
-      } else if (e.key === 'ArrowLeft') {
-        setCurrentIndex((prev) => Math.max(0, prev - 1));
       }
     };
 
@@ -253,28 +258,32 @@ export default function QuizPage() {
   }
 
   if (submittedResult || isDisqualified) {
+    const isDisq = isDisqualified || submittedResult?.status === 'DISQUALIFIED';
+
     return (
       <div className="min-h-screen flex flex-col bg-neutral-50 text-neutral-900">
         <Header />
         <main className="flex-1 max-w-lg mx-auto px-4 py-8 sm:py-16 flex flex-col justify-center items-center w-full">
           <div className="rounded-xl border border-neutral-200 bg-white p-6 sm:p-8 text-center w-full shadow-xs">
             <div className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full font-bold text-2xl border ${
-              isDisqualified || submittedResult?.status === 'DISQUALIFIED'
+              isDisq
                 ? 'bg-red-100 text-red-600 border-red-200'
                 : 'bg-emerald-100 text-emerald-700 border-emerald-200'
             }`}>
-              {isDisqualified || submittedResult?.status === 'DISQUALIFIED' ? '❌' : '✓'}
+              {isDisq ? '❌' : '✓'}
             </div>
 
-            <h1 className={`text-xs font-mono uppercase tracking-wider font-bold mb-1 ${
-              isDisqualified || submittedResult?.status === 'DISQUALIFIED' ? 'text-red-600' : 'text-emerald-700'
+            <h1 className={`text-2xl font-extrabold tracking-tight mb-1 ${
+              isDisq ? 'text-red-600' : 'text-emerald-700'
             }`}>
-              {isDisqualified || submittedResult?.status === 'DISQUALIFIED'
-                ? 'Attempt Terminated & Disqualified'
-                : 'Quiz Submitted Successfully'}
+              {isDisq ? 'Disqualified' : 'Quiz Submitted'}
             </h1>
 
-            <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-6">
+            <p className="text-xs font-mono text-neutral-500 font-semibold mb-6">
+              {isDisq ? 'Attempt Terminated & Disqualified' : 'Quiz Submitted Successfully ✓'}
+            </p>
+
+            <h2 className="text-base sm:text-lg font-bold text-neutral-900 mb-6 border-t border-b border-neutral-100 py-2">
               Participant: {submittedResult?.participantName || 'Registered User'}
             </h2>
 
@@ -499,19 +508,11 @@ export default function QuizPage() {
             />
           )}
 
-          <div className="flex items-center justify-between pt-1">
-            <button
-              onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-              disabled={currentIndex === 0}
-              className="px-3.5 sm:px-5 py-2.5 rounded-md border border-neutral-300 bg-white text-xs sm:text-sm font-semibold text-neutral-700 hover:bg-neutral-50 disabled:opacity-30 disabled:pointer-events-none transition-colors shadow-2xs"
-            >
-              ← <span className="hidden sm:inline">Previous (Left Arrow)</span><span className="sm:hidden">Prev</span>
-            </button>
-
+          <div className="flex items-center justify-end pt-1">
             {currentIndex < questions.length - 1 ? (
               <button
                 onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
-                className="px-4 sm:px-6 py-2.5 rounded-md bg-neutral-900 text-white font-semibold text-xs sm:text-sm hover:bg-neutral-800 transition-colors shadow-xs"
+                className="px-5 sm:px-7 py-2.5 rounded-md bg-neutral-900 text-white font-semibold text-xs sm:text-sm hover:bg-neutral-800 transition-colors shadow-xs"
               >
                 <span className="hidden sm:inline">Next Question (Right Arrow)</span><span className="sm:hidden">Next</span> →
               </button>
@@ -519,7 +520,7 @@ export default function QuizPage() {
               <button
                 onClick={() => setShowConfirmModal(true)}
                 disabled={submitting}
-                className="px-4 sm:px-6 py-2.5 rounded-md bg-emerald-600 text-white font-semibold text-xs sm:text-sm hover:bg-emerald-500 transition-colors shadow-xs disabled:opacity-50"
+                className="px-5 sm:px-7 py-2.5 rounded-md bg-emerald-600 text-white font-semibold text-xs sm:text-sm hover:bg-emerald-500 transition-colors shadow-xs disabled:opacity-50"
               >
                 Submit Quiz ✓
               </button>
@@ -527,7 +528,7 @@ export default function QuizPage() {
           </div>
 
           <p className="text-[11px] text-neutral-400 font-mono text-center hidden sm:block">
-            Pro Tip: Use keys 1, 2, 3, 4 (or A, B, C, D) to pick options • Use ← / → arrows to navigate.
+            Pro Tip: Use keys 1, 2, 3, 4 (or A, B, C, D) to pick options • Press Right Arrow → for Next Question.
           </p>
         </div>
 
@@ -537,7 +538,11 @@ export default function QuizPage() {
             currentIndex={currentIndex}
             answers={answers}
             questions={questions}
-            onSelectQuestion={(idx) => setCurrentIndex(idx)}
+            onSelectQuestion={(idx) => {
+              if (idx >= currentIndex) {
+                setCurrentIndex(idx);
+              }
+            }}
           />
 
           <div className="rounded-xl border border-neutral-200 bg-white p-4 sm:p-5 shadow-xs">

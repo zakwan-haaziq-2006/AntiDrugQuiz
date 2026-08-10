@@ -6,8 +6,8 @@ import { Header } from '@/components/Header';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState<string>('admin_login');
-  const [password, setPassword] = useState<string>('admin@login.123');
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -53,25 +53,6 @@ export default function AdminLoginPage() {
             </div>
           )}
 
-          {/* Quick Credential Hint */}
-          <div className="mb-5 rounded-lg border border-neutral-200 bg-neutral-50 p-3.5 text-xs text-neutral-700 font-mono">
-            <div className="font-bold text-neutral-900 mb-1 flex items-center justify-between">
-              <span>🔑 Default Admin Credentials</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setUsername('admin_login');
-                  setPassword('admin@login.123');
-                }}
-                className="text-[10px] bg-neutral-200 hover:bg-neutral-300 px-2 py-0.5 rounded text-neutral-800 font-sans font-medium"
-              >
-                Autofill
-              </button>
-            </div>
-            <div>Username: <span className="font-bold text-neutral-900">admin_login</span></div>
-            <div>Password: <span className="font-bold text-neutral-900">admin@login.123</span></div>
-          </div>
-
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1">
@@ -82,7 +63,7 @@ export default function AdminLoginPage() {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin_login"
+                placeholder="Enter admin username"
                 className="w-full rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-hidden"
               />
             </div>
@@ -96,7 +77,7 @@ export default function AdminLoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="admin@login.123"
+                placeholder="Enter password"
                 className="w-full rounded-md border border-neutral-300 bg-white px-3.5 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:outline-hidden"
               />
             </div>

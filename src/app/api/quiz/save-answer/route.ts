@@ -30,7 +30,18 @@ export async function POST(request: Request) {
       include: { quiz: true },
     });
 
-    if (!attempt || attempt.status !== 'IN_PROGRESS' || attempt.quiz.status === 'ENDED') {
+    if (!attempt) {
+      return NextResponse.json({ error: 'Attempt record not found' }, { status: 404 });
+    }
+
+    if (attempt.status === 'DISQUALIFIED') {
+      return NextResponse.json(
+        { error: 'You are disqualified from this quiz competition due to malpractice violations.', status: 'DISQUALIFIED', isDisqualified: true },
+        { status: 403 }
+      );
+    }
+
+    if (attempt.status !== 'IN_PROGRESS' || attempt.quiz.status === 'ENDED') {
       return NextResponse.json(
         { error: 'Cannot modify answers. Quiz has ended or attempt is finalized.', timeExpired: true },
         { status: 400 }

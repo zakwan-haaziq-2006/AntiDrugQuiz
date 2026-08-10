@@ -41,29 +41,37 @@ export async function POST(request: Request) {
 
     // Handle disqualified attempt
     if (attempt.status === 'DISQUALIFIED') {
-      return NextResponse.json({
-        success: true,
-        alreadySubmitted: true,
-        status: 'DISQUALIFIED',
+      const result = {
         score: attempt.score ?? 0,
         totalQuestions: attempt.quiz.questions.length,
         completionTimeMs: attempt.completionTimeMs ?? 0,
         formattedTime: formatTimeMs(attempt.completionTimeMs),
         participantName: attempt.participant.name,
+        status: 'DISQUALIFIED',
+      };
+      return NextResponse.json({
+        success: true,
+        alreadySubmitted: true,
+        result,
+        ...result,
       });
     }
 
     // Prevent double submission
     if (attempt.status === 'COMPLETED' || attempt.status === 'AUTO_SUBMITTED') {
+      const result = {
+        score: attempt.score ?? 0,
+        totalQuestions: attempt.quiz.questions.length,
+        completionTimeMs: attempt.completionTimeMs ?? 0,
+        formattedTime: formatTimeMs(attempt.completionTimeMs),
+        participantName: attempt.participant.name,
+        status: attempt.status,
+      };
       return NextResponse.json({
         success: true,
         alreadySubmitted: true,
-        status: attempt.status,
-        score: attempt.score,
-        totalQuestions: attempt.quiz.questions.length,
-        completionTimeMs: attempt.completionTimeMs,
-        formattedTime: formatTimeMs(attempt.completionTimeMs),
-        participantName: attempt.participant.name,
+        result,
+        ...result,
       });
     }
 
@@ -127,15 +135,20 @@ export async function POST(request: Request) {
       console.warn('Socket broadcast warning:', socketError);
     }
 
-    return NextResponse.json({
-      success: true,
+    const result = {
       score,
       totalQuestions: questions.length,
       completionTimeMs,
       formattedTime: formatTimeMs(completionTimeMs),
       participantName: attempt.participant.name,
-      submittedAt: submittedAt.toISOString(),
       status: finalStatus,
+    };
+
+    return NextResponse.json({
+      success: true,
+      result,
+      ...result,
+      submittedAt: submittedAt.toISOString(),
     });
   } catch (error: any) {
     console.error('Quiz Submit API Error:', error);
